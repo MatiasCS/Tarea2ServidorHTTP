@@ -21,15 +21,26 @@ public class ClienteTCP {
     Socket conexionCliente;
     final static int puerto = 8082;
     InetAddress IP;
+    String comandos[] = {"MEET","SENDMSG"}; //Arreglo con los comandos utilizados por el protocolo
+    DataOutputStream outServer;
     
     public ClienteTCP() throws UnknownHostException, IOException{
         this.IP = InetAddress.getByName("192.168.0.4"); 
         this.conexionCliente = new Socket("localhost", puerto);
+        this.outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
     }
     
-    public void SEND(String mensaje) throws IOException{
-        DataOutputStream outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
-        outServer.writeBytes(mensaje + '\n');
+    public void MEET() throws IOException{
+        String mensajeTotal = comandos[0] + " Hola";
+        outServer.writeBytes(mensajeTotal + "\n");
         outServer.flush();
+    }
+    
+    //Metodo para enviar un mensaje
+    public void SENDMSG(String mensaje, String IPDestino) throws IOException{
+        String mensajeTotal = comandos[0] + " " + IPDestino + " " + mensaje; //Variable que guarda el mensaje junto a los parametros adicionales necesarios
+        outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
+        outServer.flush();
+        
     }
 }
