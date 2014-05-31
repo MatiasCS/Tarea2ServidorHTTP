@@ -27,7 +27,7 @@ public class ClienteTCP {
         this.conexionCliente = new Socket("localhost", puerto);
     }
     
-    public void enviarMensaje(String mensaje) throws IOException{
+    public void SEND(String mensaje) throws IOException{
         DataOutputStream outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
         outServer.writeBytes(mensaje + '\n');
         outServer.flush();

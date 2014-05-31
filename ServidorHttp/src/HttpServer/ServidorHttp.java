@@ -22,8 +22,6 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import TCPClient.ClienteTCP;
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,18 +68,17 @@ public class ServidorHttp implements Runnable{
         
         // Mensaje cliente, archivo que se pide, metodo POST o GET
         BufferedReader formulario;      //Variable que guarda la entrada.
-        BufferedReader entradacliente;
-        String archivoPedido;
-        String metodo;
-        BufferedOutputStream salidaArchivo;
-        PrintWriter output = null;
+        BufferedReader entradacliente;  //Variable que lee la entrada del cliente
+        String archivoPedido;           //Nombre del archivo que pide el cliente http
+        String metodo;                  //Metodo usado en el form html
+        BufferedOutputStream salidaArchivo; //Variable para enviar el arhvio;
+        PrintWriter output = null;          //Variable para enviar el mensaje del Servidor al cliente
         try {
         
             //Lectura mensaje enviado por el cliente
-            //crearHtml();
             entradacliente = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
             String entrada = entradacliente.readLine();
-            System.out.println("Entrada:"+ entrada + "\n");//nuevo
+            //System.out.println("Entrada:"+ entrada + "\n");
             StringTokenizer token = new StringTokenizer(entrada);
             metodo = token.nextToken();
             archivoPedido = token.nextToken();
@@ -90,7 +87,8 @@ public class ServidorHttp implements Runnable{
             
             
             formulario =entradacliente; //Se le da el valor a la variable de lo que envia el Usuario
-
+            
+            //Se verifica s el arhivo es el index.html
             if(archivoPedido.equals("/"))
                 archivoPedido += inicio;
         
@@ -99,38 +97,38 @@ public class ServidorHttp implements Runnable{
                 FileInputStream stream;               
                 File archivo = new File(directorio_raiz,archivoPedido);                    
                 int pesoArchivo = (int) archivo.length();
+                
+                //Se verifica si se hace una peticion GET O POST o si se quiere enviar un mensaje
                 if(!archivoPedido.startsWith("/?")){
-                   
                     byte[] buffer = new byte[pesoArchivo];                   
                     List <String> lista = obtenerContactos();
                     
+                    /*Se interfiere el archivo index para poder mostrar la lista de contactos sin la necesidad
+                    de reescribir el archivo html original*/
                     if(archivoPedido.startsWith("/index")){
                         BufferedReader index = new BufferedReader(new FileReader(archivo));
                         String linea;
-                        String temp = "";
-                        Iterator iterador2 = lista.iterator();
-                        boolean flag = true;                        
-                        String ultimoNombre = "";
-                        boolean escribo = true;                          
+                        String nuevoIndex = "";                        
                         while(index.ready()){
                             linea = index.readLine();
                             if(linea.indexOf("<!--Contactos-->")>0){                                  
                                 Iterator iterador = lista.iterator();
                                 while(iterador.hasNext()){                                    
-                                    temp += (String) iterador.next();                                  
+                                    nuevoIndex += (String) iterador.next();  //TIENE QUE SER CAMBIADO PARA VERLOS COMO BOTONES                                
                                 }
                             }
                             else
-                                temp = temp + linea;
+                                nuevoIndex = nuevoIndex + linea;
                         }
-                    output.println("HTTP/1.0 200 OK");
-                    output.println("Server: Java HTTP Server 1.0");
-                    output.println("Date: " + new Date());
-                    output.println("Content-length: " + temp.length());
-                    output.println("Content-type: text/html");
-                    output.println("");
-                    output.println(temp);
-                    output.flush();                                               
+                        //Envio del archivo temp que equivale al nuevo index html con los contactos
+                        output.println("HTTP/1.0 200 OK");
+                        output.println("Server: Java HTTP Server 1.0");
+                        output.println("Date: " + new Date());
+                        output.println("Content-length: " + nuevoIndex.length());
+                        output.println("Content-type: text/html");
+                        output.println("");
+                        output.println(nuevoIndex);
+                        output.flush();                                               
                     }
                     else{
                         stream = new FileInputStream(archivo);
@@ -153,6 +151,8 @@ public class ServidorHttp implements Runnable{
                     }
                 }
                 else{
+                    
+                    //Envio del mensaje
                     String instruccion = archivoPedido;
                     StringTokenizer t = new StringTokenizer(instruccion,"/?");
                     String mensaje = t.nextToken();
@@ -160,7 +160,7 @@ public class ServidorHttp implements Runnable{
                     if(mensaje.startsWith("mensaje")){
                         ClienteTCP TCPClient;
                         TCPClient = new ClienteTCP();
-                        TCPClient.enviarMensaje(mensaje);
+                        //Aqui va el metodo que envia el mesnaje
                     }
                 }
                 conexion.close();
@@ -269,7 +269,6 @@ public class ServidorHttp implements Runnable{
             //bw.close();
             entrada.close();
         }catch (IOException e) {
-            e.printStackTrace();
         }
         return Contactos;
     }
