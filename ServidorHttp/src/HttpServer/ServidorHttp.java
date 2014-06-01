@@ -203,6 +203,12 @@ public class ServidorHttp implements Runnable{
                                 break;
                             case("SENDOK"):
                                 break;
+                            //Enviar Mensaje.
+                            case("SENDM"):
+                                break;
+                            //Enviar Archivo.
+                            case("SENDF")
+                                break;
                         }
                     }
                 }

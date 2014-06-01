@@ -62,4 +62,36 @@ public class ClienteTCP {
         String linea = inServidorTCP.readLine();
         return linea;
     }
+    
+    //Funcion para enviar por una conexion los datos Nombre y Tamaño del archivo que se mandará
+    //Como parametro recibe un directorio que será entregado desde la página WEB semantica
+    public void enviarArchivo_nombre_y_largo(String Directorio) throws IOException{
+        DataOutputStream dos = new DataOutputStream( conexionCliente.getOutputStream() );
+        String nombreArchivo=Directorio;
+        File archivo = new File( nombreArchivo );
+        int tamannoArchivo = ( int )archivo.length();
+        dos.writeUTF( archivo.getName() );
+        dos.writeInt( tamannoArchivo );
+    }
+    //Funcion para enviar por una conexion el Flujo de datos del archivo.
+    //Como parametros recibe el directorio del archivo
+    public void enviarArchivo_datos(String directorio) throws IOException{
+        String nombreArchivo=directorio;
+        File archivo = new File( nombreArchivo );
+        int largo_archivo = ( int )archivo.length();
+        
+        FileInputStream fis = new FileInputStream( directorio );
+        BufferedInputStream bis = new BufferedInputStream( fis );
+        BufferedOutputStream bos = new BufferedOutputStream( conexionCliente.getOutputStream()          );
+        byte[] buffer = new byte[ largo_archivo ];
+        bis.read( buffer ); 
+        for( int i = 0; i < buffer.length; i++ )
+        {
+            bos.write( buffer[ i ] ); 
+        } 
+        bis.close();
+        bos.close();
+        conexionCliente.close(); 
+    }
+    
 }
