@@ -23,7 +23,7 @@ public class ClienteTCP {
     Socket conexionCliente;
     final static int puerto = 8082;
     InetAddress IP;
-    String comandos[] = {"MEET","SENDMSG"}; //Arreglo con los comandos utilizados por el protocolo
+    String comandos[] = {"MEET","SENDMSG","GOTMSG"}; //Arreglo con los comandos utilizados por el protocolo
     
     public ClienteTCP() throws UnknownHostException, IOException{
         this.IP = InetAddress.getByName("192.168.0.4"); 
@@ -46,6 +46,14 @@ public class ClienteTCP {
         outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
         outServer.flush();
         
+    }
+    
+    public void GOTMSG(String IPOrigen, String nSequencia) throws IOException{
+        DataOutputStream outServer;
+        outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
+        String mensajeTotal = comandos[2] + "##" + IPOrigen + "##" + nSequencia; //Variable que guarda el mensaje junto a los parametros adicionales necesarios
+        outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
+        outServer.flush();
     }
     
     public String leerServidor() throws IOException{

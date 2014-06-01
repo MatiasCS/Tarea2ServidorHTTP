@@ -49,7 +49,7 @@ public class ServidorHttp implements Runnable{
     public static void main(String[] args)  {
         try {
             // TODO code application logic here
-            
+            //Prueba
             ClienteTCP TCPClient;
             TCPClient = new ClienteTCP();
             //Inicio de la convesacion con el Servidor
@@ -69,6 +69,16 @@ public class ServidorHttp implements Runnable{
                         break;
                     }
             }
+            TCPClient.GOTMSG("192.168.0.4", "0");
+            linea = TCPClient.leerServidor();
+            while(linea != null){
+                System.out.println(linea);
+                linea = TCPClient.leerServidor();
+                if(linea.startsWith("FIN"))
+                    linea = null;
+            }
+            //Prueba
+            
             //Creacion del servidor y espera de clientes
             System.out.println(InetAddress.getLocalHost());
             ServerSocket servidor = new ServerSocket(puerto);
