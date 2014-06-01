@@ -49,6 +49,26 @@ public class ServidorHttp implements Runnable{
     public static void main(String[] args)  {
         try {
             // TODO code application logic here
+            
+            ClienteTCP TCPClient;
+            TCPClient = new ClienteTCP();
+            //Inicio de la convesacion con el Servidor
+            TCPClient.MEET();            
+            String linea = TCPClient.leerServidor();
+            while(linea != null){
+                StringTokenizer token1 = new StringTokenizer(linea, "##");
+                String metodo1 = token1.nextToken();           
+                System.out.println(metodo1);
+                switch(metodo1){
+                    case("GREET"):
+                        TCPClient.SENDMSG("Anyone is there?", "192.168.0.4", "192.168.0.4" );
+                        linea = TCPClient.leerServidor();
+                        break;
+                    case("SENDOK"):
+                        linea = null;
+                        break;
+                    }
+            }
             //Creacion del servidor y espera de clientes
             System.out.println(InetAddress.getLocalHost());
             ServerSocket servidor = new ServerSocket(puerto);
@@ -152,7 +172,8 @@ public class ServidorHttp implements Runnable{
                 }
                 else{
                     
-                    //Envio del mensaje
+                    //En el caso de aqui vaya el metodo para enviar mensajes                                                            
+                    
                     String instruccion = archivoPedido;
                     StringTokenizer t = new StringTokenizer(instruccion,"/?");
                     String mensaje = t.nextToken();
@@ -160,7 +181,19 @@ public class ServidorHttp implements Runnable{
                     if(mensaje.startsWith("mensaje")){
                         ClienteTCP TCPClient;
                         TCPClient = new ClienteTCP();
-                        //Aqui va el metodo que envia el mesnaje
+                        //Inicio de la convesacion con el Servidor
+                        TCPClient.MEET();
+                        String linea = TCPClient.leerServidor();
+                        StringTokenizer token1 = new StringTokenizer(linea, "##");
+                        String metodo1 = token1.nextToken();
+                        
+                        switch(metodo1){
+                            case("GREET"):
+                                //TCPClient.SENDMSG(, );
+                                break;
+                            case("SENDOK"):
+                                break;
+                        }
                     }
                 }
                 conexion.close();

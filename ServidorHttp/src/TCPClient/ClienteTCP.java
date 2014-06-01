@@ -6,8 +6,10 @@
 
 package TCPClient;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -34,17 +36,22 @@ public class ClienteTCP {
         String mensajeTotal = comandos[0] + "##Hola";
         outServer.writeBytes(mensajeTotal + "\n");
         outServer.flush();
-        outServer.close();
     }
     
     //Metodo para enviar un mensaje
-    public void SENDMSG(String mensaje, String IPDestino) throws IOException{
+    public void SENDMSG(String mensaje, String IPDestino, String IPOrigen) throws IOException{
         DataOutputStream outServer;
         outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
-        String mensajeTotal = comandos[0] + "##" + IPDestino + "##" + mensaje; //Variable que guarda el mensaje junto a los parametros adicionales necesarios
+        String mensajeTotal = comandos[1] + "##" + IPDestino + "##" + IPOrigen + "##" + mensaje; //Variable que guarda el mensaje junto a los parametros adicionales necesarios
         outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
         outServer.flush();
-        outServer.close();
         
+    }
+    
+    public String leerServidor() throws IOException{
+        BufferedReader inServidorTCP;
+        inServidorTCP = new BufferedReader(new InputStreamReader(this.conexionCliente.getInputStream()));
+        String linea = inServidorTCP.readLine();
+        return linea;
     }
 }
