@@ -57,7 +57,7 @@ public class ClienteTCP {
     
     //Funcion para enviar por una conexion los datos Nombre y Tamaño del archivo que se mandará
     //Como parametro recibe un directorio que será entregado desde la página WEB semantica
-    public void enviarArchivo_nombre_y_tamaño(String Directorio) throws IOException{
+    public void enviarArchivo_nombre_y_largo(String Directorio) throws IOException{
         DataOutputStream dos = new DataOutputStream( conexionCliente.getOutputStream() );
         String nombreArchivo=Directorio;
         File archivo = new File( nombreArchivo );
