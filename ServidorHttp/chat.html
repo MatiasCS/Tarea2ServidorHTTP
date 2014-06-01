@@ -21,7 +21,6 @@
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="agregarContacto.html">Agregar Contacto</a></li>
-			<li class="active"><a class="navbar-brand" href="chat.html">Chat</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -30,8 +29,14 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>Contactos</h1>
-        <p> <!--Contactos--> </p>
+		<form method="POST">
+			<table align="center" style="width:300px">
+			<tr>	
+				<td><input type="text" name="mensaje"></td>
+				<td align="center"><input type="submit" class="boton" value="Enviar"></td>
+			</tr>
+			</table>
+		</form>
       </div>
 
     </div><!-- /.container -->

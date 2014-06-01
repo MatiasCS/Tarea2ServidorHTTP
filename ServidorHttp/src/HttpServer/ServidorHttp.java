@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import TCPClient.ClienteTCP;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,36 +49,7 @@ public class ServidorHttp implements Runnable{
      */
     public static void main(String[] args)  {
         try {
-            // TODO code application logic here
-            //Prueba
-            ClienteTCP TCPClient;
-            TCPClient = new ClienteTCP();
-            //Inicio de la convesacion con el Servidor
-            TCPClient.MEET();            
-            String linea = TCPClient.leerServidor();
-            while(linea != null){
-                StringTokenizer token1 = new StringTokenizer(linea, "##");
-                String metodo1 = token1.nextToken();           
-                System.out.println(metodo1);
-                switch(metodo1){
-                    case("GREET"):
-                        TCPClient.SENDMSG("Anyone is there?", "192.168.0.4", "192.168.0.4" );
-                        linea = TCPClient.leerServidor();
-                        break;
-                    case("SENDOK"):
-                        linea = null;
-                        break;
-                    }
-            }
-            TCPClient.GOTMSG("192.168.0.4", "0");
-            linea = TCPClient.leerServidor();
-            while(linea != null){
-                System.out.println(linea);
-                linea = TCPClient.leerServidor();
-                if(linea.startsWith("FIN"))
-                    linea = null;
-            }
-            //Prueba
+            // TODO code application logic here           
             
             //Creacion del servidor y espera de clientes
             System.out.println(InetAddress.getLocalHost());
@@ -108,9 +80,9 @@ public class ServidorHttp implements Runnable{
             //Lectura mensaje enviado por el cliente
             entradacliente = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
             String entrada = entradacliente.readLine();
-            //System.out.println("Entrada:"+ entrada + "\n");
+            //System.out.println("Entrada:"+ entrada + "\n");            
             StringTokenizer token = new StringTokenizer(entrada);
-            metodo = token.nextToken();
+            metodo = token.nextToken();            
             archivoPedido = token.nextToken();
             salidaArchivo = new BufferedOutputStream(conexion.getOutputStream());
             output = new PrintWriter(conexion.getOutputStream());
@@ -126,10 +98,8 @@ public class ServidorHttp implements Runnable{
             if(metodo.equals("GET")){
                 FileInputStream stream;               
                 File archivo = new File(directorio_raiz,archivoPedido);                    
-                int pesoArchivo = (int) archivo.length();
-                
+                int pesoArchivo = (int) archivo.length();             
                 //Se verifica si se hace una peticion GET O POST o si se quiere enviar un mensaje
-                if(!archivoPedido.startsWith("/?")){
                     byte[] buffer = new byte[pesoArchivo];                   
                     List <String> lista = obtenerContactos();
                     
@@ -178,18 +148,79 @@ public class ServidorHttp implements Runnable{
 
                         entradacliente.close();
                         salidaArchivo.close();
+                    }               
+                conexion.close();
+                output.close();
+            }
+            //Implementacion POST
+            else if(metodo.equals("POST")){
+                //--------------------------------------
+                //Parte de identificar el contenido.
+                //--------------------------------------
+                int Largo=-1;                   //Variable que indica largo de la palabra.
+                String delimitadores="[& =]";   //String que contiene los delimitadores de las palabras
+                String datos1;                  //Variable auxiliar para guardar los datos que se tomaran con el metodo post
+                String[] datos2;                //Varible auxiliar para guardar los datos finales.
+                File archivo = new File(directorio_raiz,archivoPedido);
+                int pesoArchivo = (int) archivo.length();
+                while(true){
+                    final String linea=formulario.readLine();
+                    final String iniciador = "Content-Length: ";            //Variable para indicar que se debe leer la palabra que comienze con esas palabras
+                    if(linea.startsWith(iniciador)){
+                        Largo=Integer.parseInt(linea.substring(iniciador.length()));
+                    }
+                    if (linea.length()==0){
+                        break;
                     }
                 }
-                else{
+                final char[] contenido=new char[Largo];
+                formulario.read(contenido);
+                       
+                datos1 = new String(contenido);
+                System.out.println("Esto es datos1: "+datos1);    
+                datos2=datos1.split(delimitadores);
+                
+                if(datos2[0].startsWith("mensaje")){
+                    System.out.println(datos2[1]);
+                    //Prueba
+                    ClienteTCP TCPClient;
+                    TCPClient = new ClienteTCP();
+                    //Inicio de la convesacion con el Servidor
+                    TCPClient.MEET();            
+                    String linea = TCPClient.leerServidor();
+                        while(linea != null){
+                            StringTokenizer token1 = new StringTokenizer(linea, "##");
+                            String metodo1 = token1.nextToken();           
+                            System.out.println(metodo1);
+                            switch(metodo1){
+                                case("GREET"):
+                                    TCPClient.SENDMSG("Anyone is there?", "192.168.0.4", "192.168.0.4" );
+                                    linea = TCPClient.leerServidor();
+                                    break;
+                                case("SENDOK"):
+                                    linea = null;
+                                    break;
+                                }
+                        }
+                    TCPClient.GOTMSG("192.168.0.4", "0");
+                    linea = TCPClient.leerServidor();
+                    String parrafo = "";
+                    int counter = 0;
+                                                            
+                    while(!linea.equals("FIN")){                                                    
+                        if(!linea.equals("FIN")){
+                            parrafo += linea + "\r\n";
+                            counter += 1;
+                        }
+                        linea = TCPClient.leerServidor();
+                    }
+                    System.out.println(parrafo);
+                    escribirChat("192.168.0.4", parrafo,counter);
                     
-                    //En el caso de aqui vaya el metodo para enviar mensajes                                                            
-                    
-                    String instruccion = archivoPedido;
-                    StringTokenizer t = new StringTokenizer(instruccion,"/?");
-                    String mensaje = t.nextToken();
-                    
-                    if(mensaje.startsWith("mensaje")){
-                        ClienteTCP TCPClient;
+                    //Prueba
+                       
+                        
+                        /*ClienteTCP TCPClient;
                         TCPClient = new ClienteTCP();
                         //Inicio de la convesacion con el Servidor
                         TCPClient.MEET();
@@ -209,86 +240,72 @@ public class ServidorHttp implements Runnable{
                             //Enviar Archivo.
                             case("SENDF"):
                                 break;
-                        }
+                        }*/
+                      FileInputStream stream;
+                        byte[] buffer = new byte[pesoArchivo];
+
+                        stream = new FileInputStream(archivo);
+                        stream.read(buffer);
+
+                        output.println("HTTP/1.0 200 OK");
+                        output.println("Server: Java HTTP Server 1.0");
+                        output.println("Date: " + new Date());
+                        output.println("Content-length: " + pesoArchivo);
+                        output.println("Content-type: " + contenido);
+                        output.println();
+                        output.flush();
+
+                        salidaArchivo.write(buffer,0,pesoArchivo);
+                        salidaArchivo.flush();
+                }
+                else{
+                    System.out.println(datos2[1]);    
+                    System.out.println(datos2[3]);    
+                    System.out.println(datos2[5]);    
+
+
+                    //-----------------------------------------
+                    //Parte de ingresar los datos a un archivo.txt
+                    //-----------------------------------------
+                    File fichero;
+                    fichero = new File("Contactos.txt");
+
+                    try{
+                        FileWriter escritor=new FileWriter(fichero,true);
+                        BufferedWriter buffescritor=new BufferedWriter(escritor);
+                        PrintWriter escritor_final= new PrintWriter(buffescritor);
+
+                        escritor_final.append(datos2[1]+" "+datos2[3]+" "+datos2[5]+"\r\n");
+                        escritor_final.close();
+                        buffescritor.close();
+
+                        FileInputStream stream;
+                        byte[] buffer = new byte[pesoArchivo];
+
+                        stream = new FileInputStream(archivo);
+                        stream.read(buffer);
+
+                        output.println("HTTP/1.0 200 OK");
+                        output.println("Server: Java HTTP Server 1.0");
+                        output.println("Date: " + new Date());
+                        output.println("Content-length: " + pesoArchivo);
+                        output.println("Content-type: " + contenido);
+                        output.println();
+                        output.flush();
+
+                        salidaArchivo.write(buffer,0,pesoArchivo);
+                        salidaArchivo.flush();
+
+                    }
+                    catch(IOException e){}
+                    //-----------------------------------------
+                    //FIN ESCRIBIR FICHERO
+                    //-----------------------------------------
                     }
                 }
-                conexion.close();
-                output.close();
-            }
-            //Implementacion POST
-            else if(metodo.equals("POST")){
-                //--------------------------------------
-                //Parte de identificar el contenido.
-                //--------------------------------------
-                int Largo=-1;                   //Variable que indica largo de la palabra.
-                String delimitadores="[& =]";   //String que contiene los delimitadores de las palabras
-                String datos1;                  //Variable auxiliar para guardar los datos que se tomaran con el metodo post
-                String[] datos2;                //Varible auxiliar para guardar los datos finales.
-                File archivo = new File(directorio_raiz,archivoPedido);
-                int pesoArchivo = (int) archivo.length();
-                while(true){
-                    final String linea=formulario.readLine();           
-                    final String iniciador = "Content-Length: ";            //Variable para indicar que se debe leer la palabra que comienze con esas palabras
-                    if(linea.startsWith(iniciador)){
-                        Largo=Integer.parseInt(linea.substring(iniciador.length()));
-                    }
-                    if (linea.length()==0){
-                        break;
-                    }
-                }
-                final char[] contenido=new char[Largo];
-                formulario.read(contenido);
-                       
-                datos1 = new String(contenido);
-                System.out.println(datos1);    
-                datos2=datos1.split(delimitadores);
-                System.out.println(datos2[1]);    
-                System.out.println(datos2[3]);    
-                System.out.println(datos2[5]);    
-                
-                
-                //-----------------------------------------
-                //Parte de ingresar los datos a un archivo.txt
-                //-----------------------------------------
-                File fichero;
-                fichero = new File("Contactos.txt");
-                
-                try{
-                    FileWriter escritor=new FileWriter(fichero,true);
-                    BufferedWriter buffescritor=new BufferedWriter(escritor);
-                    PrintWriter escritor_final= new PrintWriter(buffescritor);
-                    
-                    escritor_final.append(datos2[1]+" "+datos2[3]+" "+datos2[5]+"\r\n");
-                    escritor_final.close();
-                    buffescritor.close();
-                
-                    FileInputStream stream;
-                    byte[] buffer = new byte[pesoArchivo];
-
-                    stream = new FileInputStream(archivo);
-                    stream.read(buffer);
-
-                    output.println("HTTP/1.0 200 OK");
-                    output.println("Server: Java HTTP Server 1.0");
-                    output.println("Date: " + new Date());
-                    output.println("Content-length: " + pesoArchivo);
-                    output.println("Content-type: " + contenido);
-                    output.println();
-                    output.flush();
-
-                    salidaArchivo.write(buffer,0,pesoArchivo);
-                    salidaArchivo.flush();
-
-                }
-                catch(IOException e){}
-                //-----------------------------------------
-                //FIN ESCRIBIR FICHERO
-                //-----------------------------------------
-
-            }
-            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        } catch (IOException ex) {
-            Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
+                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            } catch (IOException ex) {
+                Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -331,26 +348,58 @@ public class ServidorHttp implements Runnable{
         return(nombreCompleto);
     }
     
-     private String tipoDeContenido(String archivo)
-  {
-    if (archivo.endsWith(".htm") ||
-      archivo.endsWith(".html"))
-    {
-      return "text/html";
+    public void escribirChat(String nombreDoc, String linea, int nSecuencia) throws IOException{
+        File temporal = new File(nombreDoc+"_temporal.txt");
+        FileWriter writer = new FileWriter(temporal, true);
+        BufferedWriter bw = new BufferedWriter(writer);
+        PrintWriter pw = new PrintWriter(bw);
+        int secuenciaUpDate = obtenerNumeroSecuencia(nombreDoc) + nSecuencia;
+        //Paso de datos al archivo temporal
+        File conversacion = new File(nombreDoc+".txt");
+        BufferedReader br = new BufferedReader(new FileReader(conversacion));
+        String line = "";
+        pw.append(String.valueOf(secuenciaUpDate+"\r\n"));
+        line = br.readLine();
+        while(br.ready()){
+            line = br.readLine();
+            pw.append(line+"\r\n");
+        }
+        pw.append(linea+"\r\n");
+        br.close();
+        conversacion.delete();      
+        bw.close();
+        pw.close();
+        temporal.renameTo(new File(nombreDoc+".txt"));
     }
-    else if (archivo.endsWith(".png"))
-    {
-      return "image/png";
-    }
-    else if (archivo.endsWith(".jpg") ||
-      archivo.endsWith(".jpeg"))
-    {
-      return "image/jpeg";
-    }
-    else
-    {
-      return "text/plain";
-    }
-  }
     
+    public int obtenerNumeroSecuencia(String nombreDoc) throws FileNotFoundException, IOException{
+        File conversacion = new File(nombreDoc+".txt");
+        BufferedReader reader = new BufferedReader(new FileReader(conversacion));
+        String linea = reader.readLine();
+        int NumeroSequencia = Integer.parseInt(linea);
+        reader.close();
+        return NumeroSequencia;
+        
+    }
+    
+    private String tipoDeContenido(String archivo){
+      if (archivo.endsWith(".htm") ||
+        archivo.endsWith(".html"))
+      {
+        return "text/html";
+      }
+      else if (archivo.endsWith(".png"))
+      {
+        return "image/png";
+      }
+      else if (archivo.endsWith(".jpg") ||
+        archivo.endsWith(".jpeg"))
+      {
+        return "image/jpeg";
+      }
+      else
+      {
+        return "text/plain";
+      }
+    }    
 }
