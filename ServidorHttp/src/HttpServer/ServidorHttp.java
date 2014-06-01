@@ -207,7 +207,7 @@ public class ServidorHttp implements Runnable{
                             case("SENDM"):
                                 break;
                             //Enviar Archivo.
-                            case("SENDF")
+                            case("SENDF"):
                                 break;
                         }
                     }
