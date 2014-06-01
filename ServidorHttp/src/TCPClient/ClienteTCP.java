@@ -61,9 +61,9 @@ public class ClienteTCP {
         DataOutputStream dos = new DataOutputStream( conexionCliente.getOutputStream() );
         String nombreArchivo=Directorio;
         File archivo = new File( nombreArchivo );
-        int tamañoArchivo = ( int )archivo.length();
+        int tamannoArchivo = ( int )archivo.length();
         dos.writeUTF( archivo.getName() );
-        dos.writeInt( tamañoArchivo );
+        dos.writeInt( tamannoArchivo );
     }
     //Funcion para enviar por una conexion el Flujo de datos del archivo.
     //Como parametros recibe el directorio del archivo
