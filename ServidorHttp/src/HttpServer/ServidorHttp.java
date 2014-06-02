@@ -80,7 +80,7 @@ public class ServidorHttp implements Runnable{
             //Lectura mensaje enviado por el cliente
             entradacliente = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
             String entrada = entradacliente.readLine();
-            //System.out.println("Entrada:"+ entrada + "\n");            
+            System.out.println("Entrada:"+ entrada + "\n");            
             StringTokenizer token = new StringTokenizer(entrada);
             metodo = token.nextToken();            
             archivoPedido = token.nextToken();
@@ -177,7 +177,7 @@ public class ServidorHttp implements Runnable{
                 formulario.read(contenido);
                        
                 datos1 = new String(contenido);
-                System.out.println("Esto es datos1: "+datos1);    
+                System.out.println("Esto es datos1: "+datos1);               
                 datos2=datos1.split(delimitadores);
                 
                 if(datos2[0].startsWith("mensaje")){
@@ -185,9 +185,12 @@ public class ServidorHttp implements Runnable{
                     //Prueba
                     ClienteTCP TCPClient;
                     TCPClient = new ClienteTCP();
+                    
                     //Inicio de la convesacion con el Servidor
                     TCPClient.MEET();            
                     String linea = TCPClient.leerServidor();
+
+                    
                         while(linea != null){
                             StringTokenizer token1 = new StringTokenizer(linea, "##");
                             String metodo1 = token1.nextToken();           
@@ -258,6 +261,29 @@ public class ServidorHttp implements Runnable{
                         salidaArchivo.write(buffer,0,pesoArchivo);
                         salidaArchivo.flush();
                 }
+                
+              /* En esta parte  se identifica si se quiere enviar el archivo (file1) o si se quiere recibir
+                el archivo. Todabia esta en duda si se descarga todos los archivos del sujeto o lo hacemos con 
+                verificación de usuario
+                
+                if(datos2[0].startsWith("file1")){
+                        ClienteTCP TCPClient;
+                        TCPClient = new ClienteTCP();
+                        TCPClient.enviarArchivo_nombre_y_largo("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                        TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                
+                
+                  if (datos2[0].startsWith("quiero_archivo")){
+                      System.out.println("Entre!!!");
+                       ClienteTCP TCPClient;
+                       TCPClient = new ClienteTCP();
+                       TCPClient.Obtener_archivo("18083782-4");
+                       
+                       TCPClient.clinte_recibe_archivo_datos_servidor();
+                  }
+                
+                */
+                
                 else{
                     System.out.println(datos2[1]);    
                     System.out.println(datos2[3]);    
