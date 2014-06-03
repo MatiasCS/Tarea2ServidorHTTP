@@ -51,8 +51,15 @@ public class ServidorHttp implements Runnable{
         try {
             // TODO code application logic here           
             
-            //Creacion del servidor y espera de clientes
-            System.out.println(InetAddress.getLocalHost());
+            //Para ejecutar multiples clientes en un mismo PC
+            Random r = new Random();
+            int nuevo_puerto=r.nextInt(8000);
+            ServerSocket servidor = new ServerSocket(nuevo_puerto);
+            Desktop.getDesktop().browse(new URI("http://localhost:"+nuevo_puerto+"/"));
+            
+            
+            //Para ejecutar solo un cliente con IP Fija.
+            //ServerSocket servidor = new ServerSocket(puerto);
             ServerSocket servidor = new ServerSocket(puerto);
             while(true){
                 ServidorHttp cliente = new ServidorHttp(servidor.accept());
