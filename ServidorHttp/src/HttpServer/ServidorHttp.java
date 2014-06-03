@@ -22,10 +22,14 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import TCPClient.ClienteTCP;
+import java.awt.Desktop;
 import java.io.FileNotFoundException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -47,7 +51,7 @@ public class ServidorHttp implements Runnable{
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws URISyntaxException  {
         try {
             // TODO code application logic here           
             
@@ -60,7 +64,6 @@ public class ServidorHttp implements Runnable{
             
             //Para ejecutar solo un cliente con IP Fija.
             //ServerSocket servidor = new ServerSocket(puerto);
-            ServerSocket servidor = new ServerSocket(puerto);
             while(true){
                 ServidorHttp cliente = new ServidorHttp(servidor.accept());
                 Thread hebra = new Thread(cliente);
