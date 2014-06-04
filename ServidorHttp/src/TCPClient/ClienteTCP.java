@@ -44,7 +44,6 @@ public class ClienteTCP {
         outServer.flush();
     }
     
-    
     //Metodo para enviar un mensaje
     public void SENDMSG(String mensaje, String IPDestino, String IPOrigen) throws IOException{
         DataOutputStream outServer;
@@ -52,7 +51,7 @@ public class ClienteTCP {
         String mensajeTotal = comandos[1] + "##" + IPDestino + "##" + IPOrigen + "##" + mensaje; //Variable que guarda el mensaje junto a los parametros adicionales necesarios
         outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
         outServer.flush();
-        
+        System.out.println("Mensaje SENDMSG: "+mensajeTotal);
     }
     
     public void GOTMSG(String IPOrigen, String nSequencia) throws IOException{
@@ -68,7 +67,7 @@ public class ClienteTCP {
         inServidorTCP = new BufferedReader(new InputStreamReader(this.conexionCliente.getInputStream()));
         String linea = inServidorTCP.readLine();
         return linea;
-    }
+    }    
     
     //Funcion para enviar por una conexion los datos Nombre y Tamaño del archivo que se mandará
     //Como parametro recibe un directorio que será entregado desde la página WEB semantica
