@@ -29,7 +29,7 @@ public class ClienteTCP {
     Socket conexionCliente;
     final static int puerto = 8082;
     InetAddress IP;
-    String comandos[] = {"MEET","SENDMSG","GOTMSG"}; //Arreglo con los comandos utilizados por el protocolo
+    String comandos[] = {"MEET","SENDMSG","GOTMSG","SENDFILE","GOTFILE"}; //Arreglo con los comandos utilizados por el protocolo
     
     public ClienteTCP() throws UnknownHostException, IOException{
         this.IP = InetAddress.getByName("192.168.0.4"); 
@@ -62,6 +62,22 @@ public class ClienteTCP {
         outServer.flush();
     }
     
+    public void SENDFILE(String IPOrigen, String IPDestino, String nombreArchivo, int largoArchivo) throws IOException{
+        DataOutputStream outServer;
+        outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
+        String mensajeTotal =comandos[3] + "##" + IPOrigen + "##" + IPDestino + "##" + nombreArchivo + "##" + largoArchivo;
+        outServer.writeBytes(mensajeTotal +"\n");
+        outServer.flush();
+    }
+    
+    public void GOTFILE(){
+        
+    }
+    
+    
+    
+    
+    
     public String leerServidor() throws IOException{
         BufferedReader inServidorTCP;
         inServidorTCP = new BufferedReader(new InputStreamReader(this.conexionCliente.getInputStream()));
@@ -71,7 +87,7 @@ public class ClienteTCP {
     
     //Funcion para enviar por una conexion los datos Nombre y Tamaño del archivo que se mandará
     //Como parametro recibe un directorio que será entregado desde la página WEB semantica
-    public void enviarArchivo_nombre_y_largo(String Directorio) throws IOException{
+   /* public void ObtenerArchivo_nombre_y_largo(String Directorio) throws IOException{
         DataOutputStream dos = new DataOutputStream( this.conexionCliente.getOutputStream() );
         String nombreArchivo=Directorio;
         File archivo = new File( nombreArchivo );
@@ -80,6 +96,10 @@ public class ClienteTCP {
         dos.writeInt( tamannoArchivo );
         dos.flush();
     }
+    */
+    
+    
+    
     //Funcion para enviar por una conexion el Flujo de datos del archivo.
     //Como parametros recibe el directorio del archivo
     public void enviarArchivo_datos(String directorio) throws IOException{
@@ -87,18 +107,18 @@ public class ClienteTCP {
         File archivo = new File( nombreArchivo );
         int largo_archivo = ( int )archivo.length();
         
+        
         FileInputStream fis = new FileInputStream( directorio );
         BufferedInputStream bis = new BufferedInputStream( fis );
-        BufferedOutputStream bos = new BufferedOutputStream( conexionCliente.getOutputStream()          );
+        BufferedOutputStream bos = new BufferedOutputStream( conexionCliente.getOutputStream());
+        
         byte[] buffer = new byte[ largo_archivo ];
         bis.read( buffer ); 
         for( int i = 0; i < buffer.length; i++ )
         {
             bos.write( buffer[ i ] ); 
-        } 
-        bis.close();
-        bos.close();
-        conexionCliente.close(); 
+        }
+        
     }
     
     /*
