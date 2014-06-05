@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -75,9 +76,6 @@ public class ClienteTCP {
     }
     
     
-    
-    
-    
     public String leerServidor() throws IOException{
         BufferedReader inServidorTCP;
         inServidorTCP = new BufferedReader(new InputStreamReader(this.conexionCliente.getInputStream()));
@@ -85,23 +83,7 @@ public class ClienteTCP {
         return linea;
     }    
     
-    //Funcion para enviar por una conexion los datos Nombre y Tamaño del archivo que se mandará
-    //Como parametro recibe un directorio que será entregado desde la página WEB semantica
-   /* public void ObtenerArchivo_nombre_y_largo(String Directorio) throws IOException{
-        DataOutputStream dos = new DataOutputStream( this.conexionCliente.getOutputStream() );
-        String nombreArchivo=Directorio;
-        File archivo = new File( nombreArchivo );
-        int tamannoArchivo = ( int )archivo.length();
-        dos.writeUTF( archivo.getName() );
-        dos.writeInt( tamannoArchivo );
-        dos.flush();
-    }
-    */
     
-    
-    
-    //Funcion para enviar por una conexion el Flujo de datos del archivo.
-    //Como parametros recibe el directorio del archivo
     public void enviarArchivo_datos(String directorio) throws IOException{
         Socket socket = new Socket("localhost",15123);
         File transferFile = new File (directorio);
@@ -110,12 +92,9 @@ public class ClienteTCP {
         BufferedInputStream bin = new BufferedInputStream(fin);
         bin.read(bytearray,0,bytearray.length);
         OutputStream os = socket.getOutputStream();
-        System.out.println("Sending Files...");
         os.write(bytearray,0,bytearray.length);
         os.flush();
         socket.close();
-        System.out.println("File transfer complete");
-        
     }
     
     /*
