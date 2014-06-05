@@ -103,21 +103,18 @@ public class ClienteTCP {
     //Funcion para enviar por una conexion el Flujo de datos del archivo.
     //Como parametros recibe el directorio del archivo
     public void enviarArchivo_datos(String directorio) throws IOException{
-        String nombreArchivo=directorio;
-        File archivo = new File( nombreArchivo );
-        int largo_archivo = ( int )archivo.length();
-        
-        
-        FileInputStream fis = new FileInputStream( directorio );
-        BufferedInputStream bis = new BufferedInputStream( fis );
-        BufferedOutputStream bos = new BufferedOutputStream( conexionCliente.getOutputStream());
-        
-        byte[] buffer = new byte[ largo_archivo ];
-        bis.read( buffer ); 
-        for( int i = 0; i < buffer.length; i++ )
-        {
-            bos.write( buffer[ i ] ); 
-        }
+        Socket socket = new Socket("localhost",15123);
+        File transferFile = new File (directorio);
+        byte [] bytearray  = new byte [(int)transferFile.length()];
+        FileInputStream fin = new FileInputStream(transferFile);
+        BufferedInputStream bin = new BufferedInputStream(fin);
+        bin.read(bytearray,0,bytearray.length);
+        OutputStream os = socket.getOutputStream();
+        System.out.println("Sending Files...");
+        os.write(bytearray,0,bytearray.length);
+        os.flush();
+        socket.close();
+        System.out.println("File transfer complete");
         
     }
     
