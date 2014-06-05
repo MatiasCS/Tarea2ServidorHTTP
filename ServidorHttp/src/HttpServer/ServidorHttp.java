@@ -320,14 +320,40 @@ public class ServidorHttp implements Runnable{
               /* En esta parte  se identifica si se quiere enviar el archivo (file1) o si se quiere recibir
                 el archivo. Todabia esta en duda si se descarga todos los archivos del sujeto o lo hacemos con 
                 verificación de usuario
+                */
                 
                 if(datos2[0].startsWith("file1")){
+                    try {
                         ClienteTCP TCPClient;
                         TCPClient = new ClienteTCP();
-                        TCPClient.enviarArchivo_nombre_y_largo("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
-                        TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                        TCPClient.MEET();
+                        String linea = TCPClient.leerServidor();
+                        while(linea != null){
+                            StringTokenizer token1 = new StringTokenizer(linea, "##");
+                            String metodo1 = token1.nextToken();           
+                            System.out.println("IPDESTINO:!!"+IPDestino);
+                            switch(metodo1){
+                                case("GREET"):
+                                    File obtener_datos_archivo = new File( "C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                                    int tamannoArchivo = ( int )obtener_datos_archivo.length();
+                                    String nombre_archivo = obtener_datos_archivo.getName();
+                                    TCPClient.SENDFILE(IPOrigen, "1", nombre_archivo, tamannoArchivo);
+                                    TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                                    
+                                case("SENDOK"):
+                                    linea=null;
+                                    break;
+                            }
+                        }
+                        
+                        
+                    } catch (IOException ex) {
+                        Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                        
                 
-                
+                /*
                   if (datos2[0].startsWith("quiero_archivo")){
                       System.out.println("Entre!!!");
                        ClienteTCP TCPClient;
@@ -336,13 +362,12 @@ public class ServidorHttp implements Runnable{
                        
                        TCPClient.clinte_recibe_archivo_datos_servidor();
                   }
-                
                 */
                 
                 else{
-                    System.out.println(datos2[1]);    
-                    System.out.println(datos2[3]);    
-                    System.out.println(datos2[5]);    
+                    //System.out.println(datos2[1]);    
+                    //System.out.println(datos2[3]);    
+                    //System.out.println(datos2[5]);    
 
 
                     //-----------------------------------------
@@ -383,9 +408,7 @@ public class ServidorHttp implements Runnable{
                     //FIN ESCRIBIR FICHERO
                     //-----------------------------------------
                     }
-                }
-                //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            } catch (IOException ex) {
+                }            } catch (IOException ex) {
                 Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
