@@ -353,16 +353,31 @@ public class ServidorHttp implements Runnable{
                 }
                         
                 
-                /*
-                  if (datos2[0].startsWith("quiero_archivo")){
-                      System.out.println("Entre!!!");
-                       ClienteTCP TCPClient;
-                       TCPClient = new ClienteTCP();
-                       TCPClient.Obtener_archivo("18083782-4");
-                       
-                       TCPClient.clinte_recibe_archivo_datos_servidor();
-                  }
-                */
+               if (datos2[0].startsWith("file2")){
+                     ClienteTCP TCPClient;
+                     TCPClient = new ClienteTCP();
+                     TCPClient.MEET();
+                     String linea = TCPClient.leerServidor();
+                     while(linea != null){
+                            StringTokenizer token1 = new StringTokenizer(linea, "##");
+                            String metodo1 = token1.nextToken();           
+                            System.out.println("IPDESTINO:!!"+IPDestino);
+                            switch(metodo1){
+                                case("GREET"):
+                                    TCPClient.GOTFILE("1");
+                                    linea=TCPClient.leerServidor();
+                                    System.out.println(linea);
+                                    StringTokenizer token2 = new StringTokenizer(linea, "##");
+                                    String nombreArchivo = token2.nextToken();
+                                    int largo = Integer.parseInt(token2.nextToken());
+                                    TCPClient.clinte_recibe_archivo_servidor(nombreArchivo,largo);
+                                case("SENDOK"):
+                                    linea=null;
+                                    break;
+                            }
+                        }
+                 }
+                
                 
                 else{
                     //System.out.println(datos2[1]);    
@@ -380,7 +395,6 @@ public class ServidorHttp implements Runnable{
                         FileWriter escritor=new FileWriter(fichero,true);
                         BufferedWriter buffescritor=new BufferedWriter(escritor);
                         PrintWriter escritor_final= new PrintWriter(buffescritor);
-
                         escritor_final.append(datos2[1]+" "+datos2[3]+" "+datos2[5]+"\r\n");
                         escritor_final.close();
                         buffescritor.close();
