@@ -9,15 +9,19 @@ package TCPClient;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -71,8 +75,12 @@ public class ClienteTCP {
         outServer.flush();
     }
     
-    public void GOTFILE(){
-        
+    public void GOTFILE(String IP_Solicitante) throws IOException{
+        DataOutputStream outServer;
+        outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
+        String mensajeTotal=comandos[4] + "##" + IP_Solicitante;
+        outServer.writeBytes(mensajeTotal +"\n");
+        outServer.flush();
     }
     
     
@@ -85,45 +93,75 @@ public class ClienteTCP {
     
     
     public void enviarArchivo_datos(String directorio) throws IOException{
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        OutputStream os = null;
         Socket socket = new Socket("localhost",15123);
-        File transferFile = new File (directorio);
-        byte [] bytearray  = new byte [(int)transferFile.length()];
-        FileInputStream fin = new FileInputStream(transferFile);
-        BufferedInputStream bin = new BufferedInputStream(fin);
-        bin.read(bytearray,0,bytearray.length);
-        OutputStream os = socket.getOutputStream();
-        os.write(bytearray,0,bytearray.length);
+        File myFile = new File (directorio);
+        byte [] mybytearray  = new byte [(int)myFile.length()];
+        fis = new FileInputStream(myFile);
+        bis = new BufferedInputStream(fis);
+        bis.read(mybytearray,0,mybytearray.length);
+        os = socket.getOutputStream();
+        os.write(mybytearray,0,mybytearray.length);
         os.flush();
         socket.close();
-    }
-    
-    /*
-    public void clinte_recibe_archivo_datos_servidor() throws FileNotFoundException, IOException{
-        String nombreArchivo="Directorio.pdf";
-        int tam=717263;
-        FileOutputStream fos = new FileOutputStream( nombreArchivo );
-        BufferedOutputStream out = new BufferedOutputStream( fos );
-        BufferedInputStream in = new BufferedInputStream( conexionCliente.getInputStream() );
-        byte[] buffer = new byte[ tam ];
-        for( int i = 0; i < buffer.length; i++ ){            
-              buffer[ i ] = ( byte )in.read( ); 
         }
-        out.write( buffer ); 
-        out.flush(); 
-        in.close();
-        out.close(); 
-        //conexion.close();
-        System.out.println( "Archivo Recibido "+nombreArchivo );
+    
+    
+    
+    public void clinte_recibe_archivo_servidor(String nombre,int  largo) throws FileNotFoundException, IOException{        
+        /*Socket socket = new Socket("localhost",15123);
+        byte [] bytearray  = new byte [largo];
+        InputStream is = socket.getInputStream();
+	FileOutputStream fos = new FileOutputStream(nombre);
+	BufferedOutputStream bos = new BufferedOutputStream(fos);
+        is.read( bytearray );
+        for ( int i = 0; i < bytearray.length; i++ ) {
+            bos.write( bytearray[ i ] );
+        }
+	bos.flush();
+	bos.close();
+        fos.close();
+	socket.close();
+        */
+        Socket yo = null;
+            PrintWriter alServidor;
+            BufferedReader delTeclado;
+            DataInputStream delServidor;
+            String tecleado;
+            
+            try {
+                try {
+                yo = new Socket("localhost", 15123);
+            } catch (UnknownHostException e) {
+                System.out.println(e.getMessage());
+                System.exit(1);
+            }
+            
+            delTeclado = new BufferedReader(new InputStreamReader(System.in));
+            alServidor = new PrintWriter(yo.getOutputStream(), true);
+            delServidor = new DataInputStream(yo.getInputStream());
+            FileOutputStream fos = new FileOutputStream("Documento.pdf");
+            BufferedOutputStream out = new BufferedOutputStream( fos );
+            BufferedInputStream in = new BufferedInputStream( yo.getInputStream() );
+            // Creamos el array de bytes para leer los datos del archivo
+            byte[] buffer = new byte[717263];
+            // Obtenemos el archivo mediante la lectura de bytes enviados
+            for ( int i = 0; i < buffer.length; i++ ) {
+                buffer[ i ] = ( byte )in.read( );
+            }
+            out.write( buffer );
+            out.flush();
+            in.close();
+            out.close();
+            yo.close();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        
         
     }
     
-    
-    public void Obtener_archivo(String IP_Fuente) throws IOException{
-        DataOutputStream dos;
-        dos = new DataOutputStream(this.conexionCliente.getOutputStream());
-        dos.writeBytes(IP_Fuente + "\n");
-        dos.flush(); 
-    
-    }
-    */
 }
