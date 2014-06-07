@@ -39,7 +39,9 @@ import java.util.Random;
 public class ServidorHttp implements Runnable{
     
     //Variables Estaticas
-    static final int puerto = 8080;
+    //static final int puerto = 8080;
+    static final Random r = new Random();
+    static final int puerto=r.nextInt(8000);
     static final File directorio_raiz = new File(".");
     static final String inicio = "index.html";
     
@@ -57,10 +59,8 @@ public class ServidorHttp implements Runnable{
             // TODO code application logic here           
             
             //Para ejecutar multiples clientes en un mismo PC
-            Random r = new Random();
-            int nuevo_puerto=r.nextInt(8000);
-            ServerSocket servidor = new ServerSocket(nuevo_puerto);
-            Desktop.getDesktop().browse(new URI("http://localhost:"+nuevo_puerto+"/"));
+            ServerSocket servidor = new ServerSocket(puerto);
+            Desktop.getDesktop().browse(new URI("http://localhost:"+puerto+"/"));
             
             
             //Para ejecutar solo un cliente con IP Fija.
@@ -295,9 +295,9 @@ public class ServidorHttp implements Runnable{
                         }*/
                     
                     if(archivoPedido.indexOf("?")>0){
-                    String auxiliar = archivoPedido;
-                    StringTokenizer tok = new StringTokenizer(auxiliar,"?");
-                    archivoPedido = tok.nextToken();
+                        String auxiliar = archivoPedido;
+                        StringTokenizer tok = new StringTokenizer(auxiliar,"?");
+                        archivoPedido = tok.nextToken();
                     }
                         FileInputStream stream;
                         byte[] buffer = new byte[pesoArchivo];
@@ -322,7 +322,7 @@ public class ServidorHttp implements Runnable{
                 verificación de usuario
                 */
                 
-                if(datos2[0].startsWith("file1")){
+                else if(datos2[0].startsWith("file1")){
                     try {
                         ClienteTCP TCPClient;
                         TCPClient = new ClienteTCP();
@@ -339,12 +339,34 @@ public class ServidorHttp implements Runnable{
                                     String nombre_archivo = obtener_datos_archivo.getName();
                                     TCPClient.SENDFILE(IPOrigen, "1", nombre_archivo, tamannoArchivo);
                                     TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
-                                    
                                 case("SENDOK"):
                                     linea=null;
                                     break;
                             }
                         }
+                        
+                        if(archivoPedido.indexOf("?")>0) {
+                            String auxiliar = archivoPedido;
+                            StringTokenizer tok = new StringTokenizer(auxiliar,"?");
+                            archivoPedido = tok.nextToken();
+                    }
+                     
+                        FileInputStream stream;
+                        byte[] buffer = new byte[pesoArchivo];
+
+                        stream = new FileInputStream(archivo);
+                        stream.read(buffer);
+
+                        output.println("HTTP/1.0 200 OK");
+                        output.println("Server: Java HTTP Server 1.0");
+                        output.println("Date: " + new Date());
+                        output.println("Content-length: " + pesoArchivo);
+                        output.println("Content-type: " + contenido);
+                        output.println();
+                        output.flush();
+
+                        salidaArchivo.write(buffer,0,pesoArchivo);
+                        salidaArchivo.flush();
                         
                         
                     } catch (IOException ex) {
@@ -353,7 +375,7 @@ public class ServidorHttp implements Runnable{
                 }
                         
                 
-               if (datos2[0].startsWith("file2")){
+                else if (datos2[0].startsWith("file2")){
                      ClienteTCP TCPClient;
                      TCPClient = new ClienteTCP();
                      TCPClient.MEET();
@@ -376,6 +398,30 @@ public class ServidorHttp implements Runnable{
                                     break;
                             }
                         }
+                     
+                     
+                        if(archivoPedido.indexOf("?")>0) {
+                            String auxiliar = archivoPedido;
+                            StringTokenizer tok = new StringTokenizer(auxiliar,"?");
+                            archivoPedido = tok.nextToken();
+                    }
+                     
+                        FileInputStream stream;
+                        byte[] buffer = new byte[pesoArchivo];
+
+                        stream = new FileInputStream(archivo);
+                        stream.read(buffer);
+
+                        output.println("HTTP/1.0 200 OK");
+                        output.println("Server: Java HTTP Server 1.0");
+                        output.println("Date: " + new Date());
+                        output.println("Content-length: " + pesoArchivo);
+                        output.println("Content-type: " + contenido);
+                        output.println();
+                        output.flush();
+
+                        salidaArchivo.write(buffer,0,pesoArchivo);
+                        salidaArchivo.flush();
                  }
                 
                 
@@ -388,9 +434,10 @@ public class ServidorHttp implements Runnable{
                     //-----------------------------------------
                     //Parte de ingresar los datos a un archivo.txt
                     //-----------------------------------------
+                   
                     File fichero;
                     fichero = new File("Contactos.txt");
-
+                    
                     try{
                         FileWriter escritor=new FileWriter(fichero,true);
                         BufferedWriter buffescritor=new BufferedWriter(escritor);
@@ -417,7 +464,8 @@ public class ServidorHttp implements Runnable{
                         salidaArchivo.flush();
 
                     }
-                    catch(IOException e){}
+                    catch(IOException e){
+                    }
                     //-----------------------------------------
                     //FIN ESCRIBIR FICHERO
                     //-----------------------------------------
