@@ -8,3 +8,4 @@ Andrea 1 1
 Carla 1 1
 Nicol 22 22
 Felipe 2 2
+Andrea 1 2

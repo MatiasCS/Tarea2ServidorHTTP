@@ -40,8 +40,6 @@ public class ServidorHttp implements Runnable{
     
     //Variables Estaticas
     //static final int puerto = 8080;
-    static final Random r = new Random();
-    static final int puerto=r.nextInt(8000);
     static final File directorio_raiz = new File(".");
     static final String inicio = "index.html";
     
@@ -57,8 +55,9 @@ public class ServidorHttp implements Runnable{
     public static void main(String[] args) throws URISyntaxException  {
         try {
             // TODO code application logic here           
-            
             //Para ejecutar multiples clientes en un mismo PC
+            Random r = new Random();
+            int puerto = r.nextInt(8000);
             ServerSocket servidor = new ServerSocket(puerto);
             Desktop.getDesktop().browse(new URI("http://localhost:"+puerto+"/"));
             
@@ -500,7 +499,7 @@ public class ServidorHttp implements Runnable{
         }catch (IOException e) {
         }
     }
-    
+   
     public List<String> obtenerContactos(){
         File f = new File( "Contactos.txt" );
         List<String> Contactos = new ArrayList<>();

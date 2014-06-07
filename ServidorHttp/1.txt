@@ -2,3 +2,7 @@
 Tu: Hola+como+estas
 QUE+ONDA+MICROONDAS
 
+Tu: Hola+como+estas
+
+Tu: Hola
+
