@@ -111,21 +111,7 @@ public class ClienteTCP {
     
     
     public void clinte_recibe_archivo_servidor(String nombre,int  largo) throws FileNotFoundException, IOException{        
-        /*Socket socket = new Socket("localhost",15123);
-        byte [] bytearray  = new byte [largo];
-        InputStream is = socket.getInputStream();
-	FileOutputStream fos = new FileOutputStream(nombre);
-	BufferedOutputStream bos = new BufferedOutputStream(fos);
-        is.read( bytearray );
-        for ( int i = 0; i < bytearray.length; i++ ) {
-            bos.write( bytearray[ i ] );
-        }
-	bos.flush();
-	bos.close();
-        fos.close();
-	socket.close();
-        */
-        Socket yo = null;
+            Socket yo = null;
             PrintWriter alServidor;
             BufferedReader delTeclado;
             DataInputStream delServidor;
@@ -133,7 +119,7 @@ public class ClienteTCP {
             
             try {
                 try {
-                yo = new Socket("localhost", 15123);
+                yo = new Socket("127.0.0.1", 15123);
             } catch (UnknownHostException e) {
                 System.out.println(e.getMessage());
                 System.exit(1);
@@ -142,11 +128,15 @@ public class ClienteTCP {
             delTeclado = new BufferedReader(new InputStreamReader(System.in));
             alServidor = new PrintWriter(yo.getOutputStream(), true);
             delServidor = new DataInputStream(yo.getInputStream());
-            FileOutputStream fos = new FileOutputStream("Documento.pdf");
+            int puerto_fuente=1;
+            File folder = new File("descargas_"+puerto_fuente);
+            folder.mkdirs();
+            
+            FileOutputStream fos = new FileOutputStream("descargas_"+puerto_fuente+"/"+nombre);
             BufferedOutputStream out = new BufferedOutputStream( fos );
             BufferedInputStream in = new BufferedInputStream( yo.getInputStream() );
             // Creamos el array de bytes para leer los datos del archivo
-            byte[] buffer = new byte[717263];
+            byte[] buffer = new byte[largo];
             // Obtenemos el archivo mediante la lectura de bytes enviados
             for ( int i = 0; i < buffer.length; i++ ) {
                 buffer[ i ] = ( byte )in.read( );
