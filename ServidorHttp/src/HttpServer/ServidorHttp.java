@@ -519,6 +519,7 @@ public class ServidorHttp implements Runnable{
                 linea = entrada.readLine();
                 StringTokenizer nombre = new StringTokenizer(linea);
                 Contactos.add(leerNombre(nombre.nextToken()));
+                nombre.nextToken();
                 Contactos.add(leerNombre(nombre.nextToken()));
                 //wr.append("<FONT FACE = 'calibri' >" + leerNombre(nombre.nextToken()) + "</FONT><BR>");
             }
