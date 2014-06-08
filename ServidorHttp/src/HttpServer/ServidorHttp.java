@@ -58,8 +58,8 @@ public class ServidorHttp implements Runnable{
             //Para ejecutar multiples clientes en un mismo PC
             Random r = new Random();
             int puerto = r.nextInt(8000);
-            ServerSocket servidor = new ServerSocket(puerto);
-            Desktop.getDesktop().browse(new URI("http://localhost:"+puerto+"/"));
+            ServerSocket servidor = new ServerSocket(4695);
+            Desktop.getDesktop().browse(new URI("http://localhost:4695/"));
             
             
             //Para ejecutar solo un cliente con IP Fija.
@@ -128,7 +128,31 @@ public class ServidorHttp implements Runnable{
                     
                     elemento.nextToken();
                     IPDestino = elemento.nextToken();
-                    System.out.println("IPDESTINO" + IPDestino);
+                    
+                    ClienteTCP TCPClient = new ClienteTCP();
+                    String linea = "";
+                    TCPClient.GOTMSG(IPOrigen, String.valueOf(obtenerNumeroSecuencia(IPDestino)));
+                    linea = TCPClient.leerServidor();
+                    String parrafo = "";
+                    String linea1 = "";
+                    int counter = 0;
+                                                            
+                    while(!linea.equals("FIN")){                                                    
+                        if(!linea.equals("FIN")){
+                            System.out.println(linea);
+                            StringTokenizer p = new StringTokenizer(linea,"##");
+                            p.nextToken();
+                            linea1 = p.nextToken();
+                            parrafo +=  getNombre(p.nextToken())+ ":" + linea1 + "\r\n";
+                            counter += 1;
+                        }
+                        linea = TCPClient.leerServidor();
+                    }
+                    //System.out.println(parrafo);
+                    escribirChat(IPDestino, parrafo,counter);
+                    crearHtml(IPDestino);
+                    
+                    //System.out.println("IPDESTINO" + IPDestino);
                 }
                 
                 System.out.println("Archivo pedido: "+archivoPedido);
@@ -234,13 +258,13 @@ public class ServidorHttp implements Runnable{
                     ClienteTCP TCPClient;
                     
                     //Acá se crea la conexion TCP referenciando la IP del contacto.
-                    TCPClient = new ClienteTCP(IPDestino);
+                    TCPClient = new ClienteTCP();
                     TCPClient.MEET();            
                     String linea = TCPClient.leerServidor();
                         while(linea != null){
                             StringTokenizer token1 = new StringTokenizer(linea, "##");
                             String metodo1 = token1.nextToken();           
-                            System.out.println("IPDESTINO:!!"+IPDestino);
+                            //System.out.println("IPDESTINO:!!"+IPDestino);
                             switch(metodo1){
                                 case("GREET"):
                                     TCPClient.SENDMSG(mensaje, IPDestino, IPOrigen );
@@ -257,6 +281,7 @@ public class ServidorHttp implements Runnable{
                     TCPClient.GOTMSG(IPOrigen, String.valueOf(obtenerNumeroSecuencia(IPDestino)));
                     linea = TCPClient.leerServidor();
                     String parrafo = "";
+                    String linea1 = "";
                     int counter = 0;
                                                             
                     while(!linea.equals("FIN")){                                                    
@@ -264,7 +289,8 @@ public class ServidorHttp implements Runnable{
                             System.out.println(linea);
                             StringTokenizer p = new StringTokenizer(linea,"##");
                             p.nextToken();
-                            parrafo += p.nextToken() + "\r\n";
+                            linea1 = p.nextToken();
+                            parrafo +=  getNombre(p.nextToken()) + ":" + linea1 + "\r\n";
                             counter += 1;
                         }
                         linea = TCPClient.leerServidor();
@@ -328,7 +354,7 @@ public class ServidorHttp implements Runnable{
                     try {
                         ClienteTCP TCPClient;
                         //Acá se crea la conexion TCP referenciando la IP del contacto.
-                        TCPClient = new ClienteTCP(IPDestino);
+                        TCPClient = new ClienteTCP();
                         TCPClient.MEET();
                         String linea = TCPClient.leerServidor();
                         while(linea != null){
@@ -388,7 +414,7 @@ public class ServidorHttp implements Runnable{
                 
                 else if (datos2[0].startsWith("file2")){
                      ClienteTCP TCPClient;
-                     TCPClient = new ClienteTCP(IPDestino);
+                     TCPClient = new ClienteTCP();
                      TCPClient.MEET();
                      String linea = TCPClient.leerServidor();
                      System.out.println("Linea!");
@@ -567,6 +593,8 @@ public class ServidorHttp implements Runnable{
             FileWriter writer = new FileWriter(conversacion, true);
             BufferedWriter bw = new BufferedWriter(writer);
             PrintWriter pw = new PrintWriter(bw);
+            if(nSecuencia != -1)
+                pw.append("0");
             pw.append(linea);
             pw.close();
             bw.close();
@@ -608,6 +636,24 @@ public class ServidorHttp implements Runnable{
         reader.close();
         return NumeroSequencia;
         
+    }
+    
+    public String getNombre(String IP) throws FileNotFoundException, IOException{
+         File conversacion = new File("Contactos.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(conversacion));
+        String linea = "0";
+        StringTokenizer token;
+        String auxiliar = "";
+        String nombre = "";
+        if(reader.ready()){
+            linea = reader.readLine();
+            token = new StringTokenizer(linea);
+            auxiliar = token.nextToken();
+            if(token.nextToken().equals(IP))
+                nombre = auxiliar;
+        }
+        reader.close();
+        return nombre;
     }
     
     private String tipoDeContenido(String archivo){

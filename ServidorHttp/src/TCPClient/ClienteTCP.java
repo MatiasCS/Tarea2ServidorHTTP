@@ -40,9 +40,9 @@ public class ClienteTCP {
     Se modifico el constructor de tal manera que al interactuar con un contacto se conecte
     automaticamente con la IP de ese contacto.
     */
-    public ClienteTCP(String ip_destino) throws UnknownHostException, IOException{
+    public ClienteTCP(/*String ip_destino*/) throws UnknownHostException, IOException{
         this.IP = InetAddress.getByName("192.168.0.4"); 
-        this.conexionCliente = new Socket(ip_destino, puerto);
+        this.conexionCliente = new Socket("localhost",puerto);
     }
     
     public void MEET() throws IOException{
