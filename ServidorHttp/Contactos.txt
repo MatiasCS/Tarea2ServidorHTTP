@@ -9,4 +9,10 @@ Carla 1 1
 Nicol 22 22
 Felipe 2 2
 Andrea 1 2
+<<<<<<< HEAD
 Tomas 192.168.1.2 8080
+=======
+swdsv asv 1234
+Usuario_Prueba 127.0.0.1 1234
+Usuario_prueba2 127.0.0.1 321
+>>>>>>> 7359ee625f934d68d6cd9fca671caadc197671c0
