@@ -91,6 +91,7 @@ public class ServidorHttp implements Runnable{
         try {
             String IPO = String.valueOf(InetAddress.getLocalHost());
             StringTokenizer tok1 = new StringTokenizer(IPO,"/");
+            System.out.println(IPO);
             tok1.nextToken();
             IPOrigen = tok1.nextToken();
         } catch (UnknownHostException ex) {
