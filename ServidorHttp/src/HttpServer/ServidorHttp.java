@@ -343,11 +343,11 @@ public class ServidorHttp implements Runnable{
                                     2- Se envia esos datos a la IP del servidor.
                                     3-Luego se envia el flujo de datos.
                                     */
-                                    File obtener_datos_archivo = new File( "C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                                    File obtener_datos_archivo = new File("Enviar/"+datos2[1]);
                                     int tamannoArchivo = ( int )obtener_datos_archivo.length();
                                     String nombre_archivo = obtener_datos_archivo.getName();
                                     TCPClient.SENDFILE(IPOrigen, IPDestino, nombre_archivo, tamannoArchivo);
-                                    TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1],IPDestino);
+                                    TCPClient.enviarArchivo_datos("Enviar/"+datos2[1],IPDestino);
                                     
                                 case("SENDOK"):
                                     linea=null;
