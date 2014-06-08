@@ -56,8 +56,8 @@ public class ServidorHttp implements Runnable{
         try {
             // TODO code application logic here           
             //Para ejecutar multiples clientes en un mismo PC
-            Random r = new Random();
-            int puerto = r.nextInt(8000);
+            //Random r = new Random();
+            //int puerto = r.nextInt(8000);
             ServerSocket servidor = new ServerSocket(4695);
             Desktop.getDesktop().browse(new URI("http://localhost:4695/"));
             
@@ -88,6 +88,7 @@ public class ServidorHttp implements Runnable{
         String ParametroIPD = "";
         String IPOrigen = "";
         String IPDestino = "";
+        //Se obtiene la IPOrigen desde la URL
         try {
             String IPO = String.valueOf(InetAddress.getLocalHost());
             StringTokenizer tok1 = new StringTokenizer(IPO,"/");
@@ -99,11 +100,9 @@ public class ServidorHttp implements Runnable{
             Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
         }
         try {
-        
             //Lectura mensaje enviado por el cliente
             entradacliente = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
             String entrada = entradacliente.readLine();
-            //System.out.println("Entrada:"+ entrada + "\n");            
             StringTokenizer token = new StringTokenizer(entrada);
             metodo = token.nextToken();            
             archivoPedido = token.nextToken();
@@ -120,6 +119,8 @@ public class ServidorHttp implements Runnable{
             //Implementacion GET
             if(metodo.equals("GET")){
                 if(archivoPedido.indexOf("?")>0){
+                    
+                    //Se obtiene como parametro la IP de Destino a la que se le envia el mensaje a traves de la IP
                     String auxiliar = archivoPedido;
                     StringTokenizer tok = new StringTokenizer(auxiliar,"?");
                     archivoPedido = tok.nextToken();
@@ -129,6 +130,7 @@ public class ServidorHttp implements Runnable{
                     elemento.nextToken();
                     IPDestino = elemento.nextToken();
                     
+                    //Se piden mensajes al servidor TCP
                     ClienteTCP TCPClient = new ClienteTCP();
                     String linea = "";
                     TCPClient.GOTMSG(IPOrigen, String.valueOf(obtenerNumeroSecuencia(IPDestino)));
@@ -148,71 +150,68 @@ public class ServidorHttp implements Runnable{
                         }
                         linea = TCPClient.leerServidor();
                     }
-                    //System.out.println(parrafo);
                     escribirChat(IPDestino, parrafo,counter);
                     crearHtml(IPDestino);
-                    
-                    //System.out.println("IPDESTINO" + IPDestino);
                 }
                 
-                System.out.println("Archivo pedido: "+archivoPedido);
+                //System.out.println("Archivo pedido: "+archivoPedido);
+                //Se prepara la salida del archivo
                 FileInputStream stream;               
                 File archivo = new File(directorio_raiz,archivoPedido);                    
                 int pesoArchivo = (int) archivo.length();             
                 //Se verifica si se hace una peticion GET O POST o si se quiere enviar un mensaje
-                    byte[] buffer = new byte[pesoArchivo];                   
-                    List <String> lista = obtenerContactos();
-                    
-                    /*Se interfiere el archivo index para poder mostrar la lista de contactos sin la necesidad
-                    de reescribir el archivo html original*/
-                    if(archivoPedido.startsWith("/index")){
-                        BufferedReader index = new BufferedReader(new FileReader(archivo));
-                        String linea;
-                        String nuevoIndex = "";                        
-                        String nombre = "";
-                        String ip = "";
-                        while(index.ready()){
-                            linea = index.readLine();
-                            if(linea.indexOf("<!--Contactos-->")>0){                                  
-                                Iterator iterador = lista.iterator();
-                                while(iterador.hasNext()){
-                                    nombre = (String) iterador.next();
-                                    ip = (String) iterador.next();
-                                    nuevoIndex += "<a href='chat.html?ip="+ip+"'>"+nombre+"</a><br>";  //TIENE QUE SER CAMBIADO PARA VERLOS COMO BOTONES                                
-                                }
+                byte[] buffer = new byte[pesoArchivo];                   
+                List <String> lista = obtenerContactos();     
+                /*Se interfiere el archivo index para poder mostrar la lista de contactos sin la necesidad
+                de reescribir el archivo html original*/    
+                if(archivoPedido.startsWith("/index")){
+                    BufferedReader index = new BufferedReader(new FileReader(archivo));
+                    String linea;
+                    String nuevoIndex = "";                        
+                    String nombre = "";
+                    String ip = "";
+                    while(index.ready()){
+                        linea = index.readLine();
+                        if(linea.indexOf("<!--Contactos-->")>0){                                  
+                            Iterator iterador = lista.iterator();
+                            while(iterador.hasNext()){
+                                nombre = (String) iterador.next();
+                                ip = (String) iterador.next();
+                                nuevoIndex += "<a href='chat.html?ip="+ip+"'>"+nombre+"</a><br>";  //TIENE QUE SER CAMBIADO PARA VERLOS COMO BOTONES                                
                             }
-                            else
-                                nuevoIndex = nuevoIndex + linea;
                         }
-                        //Envio del archivo temp que equivale al nuevo index html con los contactos
-                        output.println("HTTP/1.0 200 OK");
-                        output.println("Server: Java HTTP Server 1.0");
-                        output.println("Date: " + new Date());
-                        output.println("Content-length: " + nuevoIndex.length());
-                        output.println("Content-type: text/html");
-                        output.println("");
-                        output.println(nuevoIndex);
-                        output.flush();                                               
+                        else
+                            nuevoIndex = nuevoIndex + linea;
                     }
-                    else{
-                        stream = new FileInputStream(archivo);
-                        stream.read(buffer);                
-                        String contenido = tipoDeContenido(archivoPedido);
+                    //Envio del archivo temp que equivale al nuevo index html con los contactos
+                    output.println("HTTP/1.0 200 OK");
+                    output.println("Server: Java HTTP Server 1.0");
+                    output.println("Date: " + new Date());
+                    output.println("Content-length: " + nuevoIndex.length());
+                    output.println("Content-type: text/html");
+                    output.println("");
+                    output.println(nuevoIndex);
+                    output.flush();                                               
+                    }
+                else{
+                    stream = new FileInputStream(archivo);
+                    stream.read(buffer);                
+                    String contenido = tipoDeContenido(archivoPedido);
 
-                        output.println("HTTP/1.0 200 OK");
-                        output.println("Server: Java HTTP Server 1.0");
-                        output.println("Date: " + new Date());
-                        output.println("Content-length: " + pesoArchivo);
-                        output.println("Content-type: " + contenido);
-                        output.println();
-                        output.flush();
+                    output.println("HTTP/1.0 200 OK");
+                    output.println("Server: Java HTTP Server 1.0");
+                    output.println("Date: " + new Date());
+                    output.println("Content-length: " + pesoArchivo);
+                    output.println("Content-type: " + contenido);
+                    output.println();
+                    output.flush();
 
-                        salidaArchivo.write(buffer,0,pesoArchivo);
-                        salidaArchivo.flush();
+                    salidaArchivo.write(buffer,0,pesoArchivo);
+                    salidaArchivo.flush();
 
-                        entradacliente.close();
-                        salidaArchivo.close();
-                    }               
+                    entradacliente.close();
+                    salidaArchivo.close();
+                }               
                 conexion.close();
                 output.close();
             }
@@ -253,37 +252,37 @@ public class ServidorHttp implements Runnable{
                 System.out.println("Esto es datos1: "+datos1);   
                 datos2=datos1.split(delimitadores);
                 
+                //Se identifica si se quiere enviar un mensaje
                 if(datos2[0].startsWith("mensaje")){
                     String mensaje = (datos2[1]);
                     ClienteTCP TCPClient;
                     
-                    //Acá se crea la conexion TCP referenciando la IP del contacto.
+                    //Se establece la conexion con el servidor TCP para el envio de mensajes
                     TCPClient = new ClienteTCP();
                     TCPClient.MEET();            
                     String linea = TCPClient.leerServidor();
-                        while(linea != null){
-                            StringTokenizer token1 = new StringTokenizer(linea, "##");
-                            String metodo1 = token1.nextToken();           
-                            //System.out.println("IPDESTINO:!!"+IPDestino);
-                            switch(metodo1){
-                                case("GREET"):
-                                    TCPClient.SENDMSG(mensaje, IPDestino, IPOrigen );
-                                    escribirChat(IPDestino, "Tu: "+mensaje, -1);
-                                    linea = TCPClient.leerServidor();
-                                    crearHtml(IPDestino);
-                                    break;
-                                case("SENDOK"):
-                                    linea = null;
-                                    break;
-                                }
-                        }
-                    //System.out.println("Esto es ip origen :"+IPOrigen);
+                    while(linea != null){
+                        StringTokenizer token1 = new StringTokenizer(linea, "##");
+                        String metodo1 = token1.nextToken();           
+                        switch(metodo1){
+                            case("GREET"):
+                                TCPClient.SENDMSG(mensaje, IPDestino, IPOrigen );
+                                escribirChat(IPDestino, "Tu: "+mensaje, -1);
+                                linea = TCPClient.leerServidor();
+                                crearHtml(IPDestino);
+                                break;
+                            case("SENDOK"):
+                                linea = null;
+                                break;
+                            }
+                    }
+                    //Se verifica si se tienen mensajes no leidos
                     TCPClient.GOTMSG(IPOrigen, String.valueOf(obtenerNumeroSecuencia(IPDestino)));
                     linea = TCPClient.leerServidor();
                     String parrafo = "";
                     String linea1 = "";
                     int counter = 0;
-                                                            
+                    
                     while(!linea.equals("FIN")){                                                    
                         if(!linea.equals("FIN")){
                             System.out.println(linea);
@@ -295,54 +294,31 @@ public class ServidorHttp implements Runnable{
                         }
                         linea = TCPClient.leerServidor();
                     }
-                    //System.out.println(parrafo);
+                    //Se escribe el chat y el html
                     escribirChat(IPDestino, parrafo,counter);
                     crearHtml(IPDestino);
-                    
-                    //Prueba
-                        /*ClienteTCP TCPClient;
-                        TCPClient = new ClienteTCP();
-                        //Inicio de la convesacion con el Servidor
-                        TCPClient.MEET();
-                        String linea = TCPClient.leerServidor();
-                        StringTokenizer token1 = new StringTokenizer(linea, "##");
-                        String metodo1 = token1.nextToken();
-                        
-                        switch(metodo1){
-                            case("GREET"):
-                                //TCPClient.SENDMSG(, );
-                                break;
-                            case("SENDOK"):
-                                break;
-                            //Enviar Mensaje.
-                            case("SENDM"):
-                                break;
-                            //Enviar Archivo.
-                            case("SENDF"):
-                                break;
-                        }*/
                     
                     if(archivoPedido.indexOf("?")>0){
                         String auxiliar = archivoPedido;
                         StringTokenizer tok = new StringTokenizer(auxiliar,"?");
                         archivoPedido = tok.nextToken();
                     }
-                        FileInputStream stream;
-                        byte[] buffer = new byte[pesoArchivo];
+                    FileInputStream stream;
+                    byte[] buffer = new byte[pesoArchivo];
 
-                        stream = new FileInputStream(archivo);
-                        stream.read(buffer);
+                    stream = new FileInputStream(archivo);
+                    stream.read(buffer);
 
-                        output.println("HTTP/1.0 200 OK");
-                        output.println("Server: Java HTTP Server 1.0");
-                        output.println("Date: " + new Date());
-                        output.println("Content-length: " + pesoArchivo);
-                        output.println("Content-type: " + contenido);
-                        output.println();
-                        output.flush();
+                    output.println("HTTP/1.0 200 OK");
+                    output.println("Server: Java HTTP Server 1.0");
+                    output.println("Date: " + new Date());
+                    output.println("Content-length: " + pesoArchivo);
+                    output.println("Content-type: " + contenido);
+                    output.println();
+                    output.flush();
 
-                        salidaArchivo.write(buffer,0,pesoArchivo);
-                        salidaArchivo.flush();
+                    salidaArchivo.write(buffer,0,pesoArchivo);
+                    salidaArchivo.flush();
                 }
                 
               /* En esta parte  se identifica si se quiere enviar el archivo (file1) o si se quiere recibir
@@ -381,29 +357,29 @@ public class ServidorHttp implements Runnable{
                                     break;
                             }
                         }
-                        
+                                               
                         if(archivoPedido.indexOf("?")>0) {
                             String auxiliar = archivoPedido;
                             StringTokenizer tok = new StringTokenizer(auxiliar,"?");
                             archivoPedido = tok.nextToken();
                     }
                      
-                        FileInputStream stream;
-                        byte[] buffer = new byte[pesoArchivo];
+                    FileInputStream stream;
+                    byte[] buffer = new byte[pesoArchivo];
 
-                        stream = new FileInputStream(archivo);
-                        stream.read(buffer);
+                    stream = new FileInputStream(archivo);
+                    stream.read(buffer);
 
-                        output.println("HTTP/1.0 200 OK");
-                        output.println("Server: Java HTTP Server 1.0");
-                        output.println("Date: " + new Date());
-                        output.println("Content-length: " + pesoArchivo);
-                        output.println("Content-type: " + contenido);
-                        output.println();
-                        output.flush();
+                    output.println("HTTP/1.0 200 OK");
+                    output.println("Server: Java HTTP Server 1.0");
+                    output.println("Date: " + new Date());
+                    output.println("Content-length: " + pesoArchivo);
+                    output.println("Content-type: " + contenido);
+                    output.println();
+                    output.flush();
 
-                        salidaArchivo.write(buffer,0,pesoArchivo);
-                        salidaArchivo.flush();
+                    salidaArchivo.write(buffer,0,pesoArchivo);
+                    salidaArchivo.flush();
                         
                         
                     } catch (IOException ex) {
@@ -413,67 +389,57 @@ public class ServidorHttp implements Runnable{
                         
                 
                 else if (datos2[0].startsWith("file2")){
-                     ClienteTCP TCPClient;
-                     TCPClient = new ClienteTCP();
-                     TCPClient.MEET();
-                     String linea = TCPClient.leerServidor();
-                     System.out.println("Linea!");
-                     while(linea != null){
-                            StringTokenizer token1 = new StringTokenizer(linea, "##");
-                            String metodo1 = token1.nextToken();           
-                            System.out.println("IPDESTINO:!!"+IPDestino);
-                            switch(metodo1){
-                                case("GREET"):
-                                    /*
-                                    1.- GOTFILE(IP) la IP en este caso es de quien quiere recibir los archivos
-                                    2.- Luego se recibe el archivo y se guarda en una carpeta con nombre IP del que recibe el archivo.
-                                    */
-                                    //TCPClient.GOTFILE(IPOrigen);
-                                    TCPClient.GOTFILE("127.0.0.1");
-                                    linea=TCPClient.leerServidor();
-                                    System.out.println(linea);
-                                    StringTokenizer token2 = new StringTokenizer(linea, "##");
-                                    String nombreArchivo = token2.nextToken();
-                                    int largo = Integer.parseInt(token2.nextToken());
-                                    TCPClient.clinte_recibe_archivo_servidor(nombreArchivo,largo,IPDestino,IPOrigen);
-                                case("SENDOK"):
-                                    linea=null;
-                                    break;
-                            }
-                        }
-                     
-                     
-                        if(archivoPedido.indexOf("?")>0) {
-                            String auxiliar = archivoPedido;
-                            StringTokenizer tok = new StringTokenizer(auxiliar,"?");
-                            archivoPedido = tok.nextToken();
-                    }
-                     
-                        FileInputStream stream;
-                        byte[] buffer = new byte[pesoArchivo];
+                    ClienteTCP TCPClient;
+                    TCPClient = new ClienteTCP();
+                    TCPClient.MEET();
+                    String linea = TCPClient.leerServidor();
+                    System.out.println("Linea!");
+                    while(linea != null){
+                           StringTokenizer token1 = new StringTokenizer(linea, "##");
+                           String metodo1 = token1.nextToken();           
+                           System.out.println("IPDESTINO:!!"+IPDestino);
+                           switch(metodo1){
+                               case("GREET"):
+                                   /*
+                                   1.- GOTFILE(IP) la IP en este caso es de quien quiere recibir los archivos
+                                   2.- Luego se recibe el archivo y se guarda en una carpeta con nombre IP del que recibe el archivo.
+                                   */
+                                   //TCPClient.GOTFILE(IPOrigen);
+                                   TCPClient.GOTFILE("127.0.0.1");
+                                   linea=TCPClient.leerServidor();
+                                   System.out.println(linea);
+                                   StringTokenizer token2 = new StringTokenizer(linea, "##");
+                                   String nombreArchivo = token2.nextToken();
+                                   int largo = Integer.parseInt(token2.nextToken());
+                                   TCPClient.clinte_recibe_archivo_servidor(nombreArchivo,largo,IPDestino,IPOrigen);
+                               case("SENDOK"):
+                                   linea=null;
+                                   break;
+                           }
+                       }
+                    if(archivoPedido.indexOf("?")>0) {
+                        String auxiliar = archivoPedido;
+                        StringTokenizer tok = new StringTokenizer(auxiliar,"?");
+                        archivoPedido = tok.nextToken();
+                    }      
+                    FileInputStream stream;
+                    byte[] buffer = new byte[pesoArchivo];
 
-                        stream = new FileInputStream(archivo);
-                        stream.read(buffer);
+                    stream = new FileInputStream(archivo);
+                    stream.read(buffer);
 
-                        output.println("HTTP/1.0 200 OK");
-                        output.println("Server: Java HTTP Server 1.0");
-                        output.println("Date: " + new Date());
-                        output.println("Content-length: " + pesoArchivo);
-                        output.println("Content-type: " + contenido);
-                        output.println();
-                        output.flush();
+                    output.println("HTTP/1.0 200 OK");
+                    output.println("Server: Java HTTP Server 1.0");
+                    output.println("Date: " + new Date());
+                    output.println("Content-length: " + pesoArchivo);
+                    output.println("Content-type: " + contenido);
+                    output.println();
+                    output.flush();
 
-                        salidaArchivo.write(buffer,0,pesoArchivo);
-                        salidaArchivo.flush();
-                 }
-                
-                
+                    salidaArchivo.write(buffer,0,pesoArchivo);
+                    salidaArchivo.flush();
+                }
                 else{
-                    //System.out.println(datos2[1]);    
-                    //System.out.println(datos2[3]);    
-                    //System.out.println(datos2[5]);    
-
-
                     //-----------------------------------------
                     //Parte de ingresar los datos a un archivo.txt
                     //-----------------------------------------
@@ -513,8 +479,10 @@ public class ServidorHttp implements Runnable{
                     //FIN ESCRIBIR FICHERO
                     //-----------------------------------------
                     }
-                }            } catch (IOException ex) {
-                Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        } 
+        catch (IOException ex) {
+            Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

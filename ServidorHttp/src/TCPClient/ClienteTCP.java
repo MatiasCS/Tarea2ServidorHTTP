@@ -44,7 +44,7 @@ public class ClienteTCP {
         this.IP = InetAddress.getByName("192.168.0.4"); 
         this.conexionCliente = new Socket("localhost",puerto);
     }
-    
+    //Saludo al servidor
     public void MEET() throws IOException{
         DataOutputStream outServer;
         outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
@@ -62,7 +62,7 @@ public class ClienteTCP {
         outServer.flush();
         System.out.println("Mensaje SENDMSG: "+mensajeTotal);
     }
-    
+    //Metodo para obtener mensajes del servidor
     public void GOTMSG(String IPOrigen, String nSequencia) throws IOException{
         DataOutputStream outServer;
         outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
@@ -70,7 +70,7 @@ public class ClienteTCP {
         outServer.writeBytes(mensajeTotal + "\n"); // Envio del mensajeTotal al servidor TCP
         outServer.flush();
     }
-    
+    //Metodo para enviar archivos
     public void SENDFILE(String IPOrigen, String IPDestino, String nombreArchivo, int largoArchivo) throws IOException{
         DataOutputStream outServer;
         outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
@@ -78,7 +78,7 @@ public class ClienteTCP {
         outServer.writeBytes(mensajeTotal +"\n");
         outServer.flush();
     }
-    
+    //Metodo para recibir archivos desde el servidor
     public void GOTFILE(String IP_Solicitante) throws IOException{
         DataOutputStream outServer;
         outServer = new DataOutputStream(this.conexionCliente.getOutputStream());
@@ -87,19 +87,15 @@ public class ClienteTCP {
         outServer.flush();
     }
     
-    
+    //Funcion que lee los inputs hacia el servidor
     public String leerServidor() throws IOException{
         BufferedReader inServidorTCP;
         inServidorTCP = new BufferedReader(new InputStreamReader(this.conexionCliente.getInputStream()));
         String linea = inServidorTCP.readLine();
         return linea;
-    }    
-    
-    
-    /*
-    Funcion que envia flujo de datos.
-    Primero se conecta a TCP Server que tiene como 
-    */
+    }        
+
+   //Funcion para el envio de archivos al directorio especificado
     public void enviarArchivo_datos(String directorio,String IP_Destino) throws IOException{
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -119,8 +115,7 @@ public class ClienteTCP {
         socket.close();
    }
     
-    
-    
+    //Funcion que recibe un archivo del servidor
     public void clinte_recibe_archivo_servidor(String nombre,int  largo,String IP_que_envia, String IP_que_recibe) throws FileNotFoundException, IOException{        
             Socket yo = null;
             PrintWriter alServidor;
@@ -130,7 +125,7 @@ public class ClienteTCP {
             
             try {
                 try {
-                yo = new Socket(IP_que_envia, 15123);
+                yo = new Socket("192.168.1.6", 15123);
             } catch (UnknownHostException e) {
                 System.out.println(e.getMessage());
                 System.exit(1);
