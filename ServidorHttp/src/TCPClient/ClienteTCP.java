@@ -36,9 +36,13 @@ public class ClienteTCP {
     InetAddress IP;
     String comandos[] = {"MEET","SENDMSG","GOTMSG","SENDFILE","GOTFILE"}; //Arreglo con los comandos utilizados por el protocolo
     
-    public ClienteTCP() throws UnknownHostException, IOException{
+    /*
+    Se modifico el constructor de tal manera que al interactuar con un contacto se conecte
+    automaticamente con la IP de ese contacto.
+    */
+    public ClienteTCP(String ip_destino) throws UnknownHostException, IOException{
         this.IP = InetAddress.getByName("192.168.0.4"); 
-        this.conexionCliente = new Socket("localhost", puerto);
+        this.conexionCliente = new Socket(ip_destino, puerto);
     }
     
     public void MEET() throws IOException{
@@ -92,11 +96,18 @@ public class ClienteTCP {
     }    
     
     
-    public void enviarArchivo_datos(String directorio) throws IOException{
+    /*
+    Funcion que envia flujo de datos.
+    Primero se conecta a TCP Server que tiene como 
+    */
+    public void enviarArchivo_datos(String directorio,String IP_Destino) throws IOException{
         FileInputStream fis = null;
         BufferedInputStream bis = null;
         OutputStream os = null;
-        Socket socket = new Socket("localhost",15123);
+        
+        //Socket socket = new Socket("localhost",15123);
+        Socket socket = new Socket(IP_Destino,15123);
+        
         File myFile = new File (directorio);
         byte [] mybytearray  = new byte [(int)myFile.length()];
         fis = new FileInputStream(myFile);
@@ -106,11 +117,11 @@ public class ClienteTCP {
         os.write(mybytearray,0,mybytearray.length);
         os.flush();
         socket.close();
-        }
+   }
     
     
     
-    public void clinte_recibe_archivo_servidor(String nombre,int  largo) throws FileNotFoundException, IOException{        
+    public void clinte_recibe_archivo_servidor(String nombre,int  largo,String IP_que_envia, String IP_que_recibe) throws FileNotFoundException, IOException{        
             Socket yo = null;
             PrintWriter alServidor;
             BufferedReader delTeclado;
@@ -119,7 +130,7 @@ public class ClienteTCP {
             
             try {
                 try {
-                yo = new Socket("127.0.0.1", 15123);
+                yo = new Socket(IP_que_envia, 15123);
             } catch (UnknownHostException e) {
                 System.out.println(e.getMessage());
                 System.exit(1);
@@ -128,11 +139,10 @@ public class ClienteTCP {
             delTeclado = new BufferedReader(new InputStreamReader(System.in));
             alServidor = new PrintWriter(yo.getOutputStream(), true);
             delServidor = new DataInputStream(yo.getInputStream());
-            int puerto_fuente=1;
-            File folder = new File("descargas_"+puerto_fuente);
+            File folder = new File("descargas_"+IP_que_recibe);
             folder.mkdirs();
             
-            FileOutputStream fos = new FileOutputStream("descargas_"+puerto_fuente+"/"+nombre);
+            FileOutputStream fos = new FileOutputStream("descargas_"+IP_que_recibe+"/"+nombre);
             BufferedOutputStream out = new BufferedOutputStream( fos );
             BufferedInputStream in = new BufferedInputStream( yo.getInputStream() );
             // Creamos el array de bytes para leer los datos del archivo

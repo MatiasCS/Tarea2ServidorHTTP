@@ -93,6 +93,7 @@ public class ServidorHttp implements Runnable{
             StringTokenizer tok1 = new StringTokenizer(IPO,"/");
             tok1.nextToken();
             IPOrigen = tok1.nextToken();
+            
         } catch (UnknownHostException ex) {
             Logger.getLogger(ServidorHttp.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -123,6 +124,7 @@ public class ServidorHttp implements Runnable{
                     archivoPedido = tok.nextToken();
                     ParametroIPD = tok.nextToken();
                     StringTokenizer elemento = new StringTokenizer(ParametroIPD,"=");
+                    
                     elemento.nextToken();
                     IPDestino = elemento.nextToken();
                     System.out.println("IPDESTINO" + IPDestino);
@@ -219,19 +221,19 @@ public class ServidorHttp implements Runnable{
                         break;
                     }
                 }
+                
                 final char[] contenido=new char[Largo];
                 formulario.read(contenido);
-                       
                 datos1 = new String(contenido);
-                System.out.println("Esto es datos1: "+datos1);    
+                System.out.println("Esto es datos1: "+datos1);   
                 datos2=datos1.split(delimitadores);
                 
                 if(datos2[0].startsWith("mensaje")){
                     String mensaje = (datos2[1]);
-                    //Prueba
                     ClienteTCP TCPClient;
-                    TCPClient = new ClienteTCP();
-                    //Inicio de la convesacion con el Servidor
+                    
+                    //Acá se crea la conexion TCP referenciando la IP del contacto.
+                    TCPClient = new ClienteTCP(IPDestino);
                     TCPClient.MEET();            
                     String linea = TCPClient.leerServidor();
                         while(linea != null){
@@ -324,7 +326,8 @@ public class ServidorHttp implements Runnable{
                 else if(datos2[0].startsWith("file1")){
                     try {
                         ClienteTCP TCPClient;
-                        TCPClient = new ClienteTCP();
+                        //Acá se crea la conexion TCP referenciando la IP del contacto.
+                        TCPClient = new ClienteTCP(IPDestino);
                         TCPClient.MEET();
                         String linea = TCPClient.leerServidor();
                         while(linea != null){
@@ -333,11 +336,19 @@ public class ServidorHttp implements Runnable{
                             System.out.println("IPDESTINO:!!"+IPDestino);
                             switch(metodo1){
                                 case("GREET"):
+                                    /*
+                                    Supuesto: Se tiene como supuesto que la IP a la cual se enviaran los archivos.
+                                    es la misma donde esta contenido el servidor TCP.
+                                    1- Se obtiene los datos del archivo.
+                                    2- Se envia esos datos a la IP del servidor.
+                                    3-Luego se envia el flujo de datos.
+                                    */
                                     File obtener_datos_archivo = new File( "C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
                                     int tamannoArchivo = ( int )obtener_datos_archivo.length();
                                     String nombre_archivo = obtener_datos_archivo.getName();
-                                    TCPClient.SENDFILE(IPOrigen, "1", nombre_archivo, tamannoArchivo);
-                                    TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1]);
+                                    TCPClient.SENDFILE(IPOrigen, IPDestino, nombre_archivo, tamannoArchivo);
+                                    TCPClient.enviarArchivo_datos("C:/Users/Felipe/Desktop/Enviar/"+datos2[1],IPDestino);
+                                    
                                 case("SENDOK"):
                                     linea=null;
                                     break;
@@ -376,22 +387,28 @@ public class ServidorHttp implements Runnable{
                 
                 else if (datos2[0].startsWith("file2")){
                      ClienteTCP TCPClient;
-                     TCPClient = new ClienteTCP();
+                     TCPClient = new ClienteTCP(IPDestino);
                      TCPClient.MEET();
                      String linea = TCPClient.leerServidor();
+                     System.out.println("Linea!");
                      while(linea != null){
                             StringTokenizer token1 = new StringTokenizer(linea, "##");
                             String metodo1 = token1.nextToken();           
                             System.out.println("IPDESTINO:!!"+IPDestino);
                             switch(metodo1){
                                 case("GREET"):
-                                    TCPClient.GOTFILE("1");
+                                    /*
+                                    1.- GOTFILE(IP) la IP en este caso es de quien quiere recibir los archivos
+                                    2.- Luego se recibe el archivo y se guarda en una carpeta con nombre IP del que recibe el archivo.
+                                    */
+                                    //TCPClient.GOTFILE(IPOrigen);
+                                    TCPClient.GOTFILE("127.0.0.1");
                                     linea=TCPClient.leerServidor();
                                     System.out.println(linea);
                                     StringTokenizer token2 = new StringTokenizer(linea, "##");
                                     String nombreArchivo = token2.nextToken();
                                     int largo = Integer.parseInt(token2.nextToken());
-                                    TCPClient.clinte_recibe_archivo_servidor(nombreArchivo,largo);
+                                    TCPClient.clinte_recibe_archivo_servidor(nombreArchivo,largo,IPDestino,IPOrigen);
                                 case("SENDOK"):
                                     linea=null;
                                     break;
@@ -519,7 +536,7 @@ public class ServidorHttp implements Runnable{
                 linea = entrada.readLine();
                 StringTokenizer nombre = new StringTokenizer(linea);
                 Contactos.add(leerNombre(nombre.nextToken()));
-                nombre.nextToken();
+                //nombre.nextToken();
                 Contactos.add(leerNombre(nombre.nextToken()));
                 //wr.append("<FONT FACE = 'calibri' >" + leerNombre(nombre.nextToken()) + "</FONT><BR>");
             }
